@@ -3,17 +3,17 @@
 . ".\can-I-wear-short-trousers-today.ps1"
 
 #Variables
-$gitDictectory = "C:\Projects\CMS\sources\Fingrid"
-$FGRConfigExport = "implementation/fgr/config/functional/FGR-config-export.json"
-$FGRLanguageAll = "implementation/fgr/config/functional/FGR-language-all.json"
+$gitDictectory = ""
+$FGRConfigExport = ""
+$FGRLanguageAll = ""
 $FGRConfigExportPath = Join-Path $gitDictectory $FGRConfigExport
 $FGRLanguageAllPath = Join-Path $gitDictectory $FGRLanguageAll
 $currentDate = Get-Date -Format "yyyyMMdd"
 $currentUserName = $env:USERNAME
-$dev1APIkey = "ec78c9b3-82fb-4f98-b9ab-7995fdc37436"
-$dev2APIkey = "f80d4840-f296-4aed-8f8a-62d51c9331bc"
-$dev3APIkey = "9684c55b-1b04-4996-9588-1a0dceb74d9e"
-$rel1APIkey = "8e6a2fa0-3c6d-4d46-b5f2-54d164c09bc1"
+$dev1APIkey = ""
+$dev2APIkey = ""
+$dev3APIkey = ""
+$rel1APIkey = ""
 
 $holiday_dates = @{
     "2024-12-25" = $chrismas
@@ -36,8 +36,8 @@ function Invoke-HttpRequest {
     }
     Write-Host "Starting download for configuration files on the $environment environment"
     try {
-        Invoke-RestMethod -Method "Get" -Uri "https://cms-fingrid-$environment-composer.azurewebsites.net/_api/FGR/config/download" -Headers $headers -OutFile $outFileConfigExport -TimeoutSec 600
-        Invoke-RestMethod -Method "Get" -Uri "https://cms-fingrid-$environment-composer.azurewebsites.net/_api/FGR/config/download-language" -Headers $headers -OutFile $outFileLanguageExport -TimeoutSec 600
+        Invoke-RestMethod -Method "Get" -Uri "" -Headers $headers -OutFile $outFileConfigExport -TimeoutSec 600
+        Invoke-RestMethod -Method "Get" -Uri "" -Headers $headers -OutFile $outFileLanguageExport -TimeoutSec 600
         Write-Host "Export files successfully downloaded for the $environment environment" -ForegroundColor Blue
     } catch {
         Write-Host "An error occurred while making the request: $($_.Exception.Message)" -ForegroundColor Red
