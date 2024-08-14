@@ -1,0 +1,96 @@
+.filter-panel-and-button {
+    margin-top: 40px;
+    margin-bottom: 15px;
+}
+
+.filter-panel-bungalows {
+    width: 500px;
+    height: 35px;
+    filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));
+}
+
+.bungalow-button {
+    background-color: #0069B4;
+    color: white;
+    border: none;
+    width: 110px;
+    height: 35px;
+    filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));
+    font-size: 14px;
+}
+
+.container-fluid {
+    padding-left: 35px;
+    padding-right: 35px;
+}
+
+.blue-background {
+    background-color: #E5F3FF;
+}
+
+.tr-size {
+    font-size: 14px;
+}
+
+.form-control {
+    font-size: 12px;
+}
+
+.row-and-buttons {
+    display: flex;
+    justify-content: space-between;
+}
+
+.std-color {
+    color: #0069B4;
+}
+
+.plus-color {
+    color: #005999;
+}
+
+.delux-color {
+    color: #1F355E;
+}
+
+.super-color {
+    color: #000000;
+}
+
+.filterButton {
+    width: 185px;
+    min-width: 185px;
+    --bs-btn-active-bg: #1F355E;
+    --bs-btn-active-border-color: #1F355;
+}
+
+.tempInput {
+    height: 20px;
+    width: 50px;
+    min-width: 50px;
+}
+
+.controlButton {
+    padding-top: 0px;
+    padding-bottom: 0px;
+    height: 30px;
+    max-height: 20px;
+    font-size: 14px;
+}
+
+.assign-tenant-button {
+    width: 150px;
+    min-width: 150px;
+    height: 20px;
+    font-size: 14px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+}
+
+.heater-alarm {
+    font-size: 20px;
+}
+
+.table-buttons > * {
+    cursor: pointer;
+}

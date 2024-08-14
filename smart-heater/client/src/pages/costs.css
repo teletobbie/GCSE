@@ -1,0 +1,92 @@
+.info-cost-container {
+    margin-top: 50px;
+    margin-bottom: 20px;
+}
+
+.total-cost-row {
+    border-radius: 5px;
+}
+
+.background-color-light-blue {
+    background-color: #E5F3FF;
+}
+
+.column-switch-button {
+   margin-right: 130px;
+   margin-bottom: 10px; 
+}
+
+.spinner-container {
+    margin-top: 200px;
+}
+
+.spinner {
+    color:#0069B4;
+    width: 4rem;
+    height: 4rem;
+}
+
+.loading-text {
+    margin: 10px;
+}
+
+.switch-button {
+    background-color: #0069B4 !important;
+}
+
+.custom-tooltip {
+    background-color: #FFFFFF;
+    height: 160px;
+    width: 230px;
+    border-radius: 10px;
+    box-shadow: 0 8px 6px -6px black;
+}
+
+.tooltip-divs {
+    display: flex;
+    justify-content: space-between;
+}
+
+.tooltip-value {
+    text-align: left;
+    padding-left: 40px;
+}
+
+.tooltip-label {
+    text-align: center;
+    margin-bottom:0;
+    font-weight: bold;
+}
+
+.small-switch-button {
+    height: 2rem;
+}
+
+.btn-primary {
+    --bs-btn-color: #fff;
+    --bs-btn-bg: #0069B4;
+    --bs-btn-border-color: #0069B4;
+    --bs-btn-hover-color: #fff;
+}
+
+.btn {
+    --bs-btn-font-size: 0.95rem;
+}
+
+.outer-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-right: 125px;
+}
+
+.gas-price-div {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.gas-price {
+    font-weight: bold;
+    margin-top: 10px;
+    margin-bottom: 0;
+}
