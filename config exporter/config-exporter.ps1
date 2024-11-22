@@ -3,17 +3,18 @@
 . ".\can-I-wear-short-trousers-today.ps1"
 
 #Variables
-$gitDictectory = ""
-$FGRConfigExport = ""
-$FGRLanguageAll = ""
+$gitDictectory = "C:\Projects\CMS\sources\Fingrid"
+$FGRConfigExport = "implementation/fgr/config/functional/FGR-config-export.json"
+$FGRLanguageAll = "implementation/fgr/config/functional/FGR-language-all.json"
 $FGRConfigExportPath = Join-Path $gitDictectory $FGRConfigExport
 $FGRLanguageAllPath = Join-Path $gitDictectory $FGRLanguageAll
 $currentDate = Get-Date -Format "yyyyMMdd"
 $currentUserName = $env:USERNAME
-$dev1APIkey = ""
-$dev2APIkey = ""
-$dev3APIkey = ""
-$rel1APIkey = ""
+$dev1APIkey = "f0f78250-4030-4372-99f7-abf5fb5d4fe9"
+$dev2APIkey = "a4898a36-d374-463c-9a6d-578a8d145d40"
+$dev3APIkey = "ffc886d8-0f31-4b57-a5c2-5dc70bccca25"
+$rel1APIkey = "cf3b284f-728c-410b-b642-76002025907d"
+$rel2APIkey = "7a1851b9-1474-4890-9696-6a66a80191ed"
 
 $holiday_dates = @{
     "2024-12-25" = $chrismas
@@ -31,13 +32,13 @@ function Invoke-HttpRequest {
         $outFileLanguageExport
     )
     $headers = @{
-        "Accept-Encoding" = "application/json"
+        "Accept" = "application/json"
         "Authorization"   = "Bearer $APIkey"
     }
     Write-Host "Starting download for configuration files on the $environment environment"
     try {
-        Invoke-RestMethod -Method "Get" -Uri "" -Headers $headers -OutFile $outFileConfigExport -TimeoutSec 600
-        Invoke-RestMethod -Method "Get" -Uri "" -Headers $headers -OutFile $outFileLanguageExport -TimeoutSec 600
+        Invoke-RestMethod -Method "Get" -Uri "https://cms-fingrid-$environment-composer.azurewebsites.net/_api/FGR/config/download" -Headers $headers -OutFile $outFileConfigExport -TimeoutSec 600
+        Invoke-RestMethod -Method "Get" -Uri "https://cms-fingrid-$environment-composer.azurewebsites.net/_api/FGR/config/download-language" -Headers $headers -OutFile $outFileLanguageExport -TimeoutSec 600
         Write-Host "Export files successfully downloaded for the $environment environment" -ForegroundColor Blue
     } catch {
         Write-Host "An error occurred while making the request: $($_.Exception.Message)" -ForegroundColor Red
@@ -68,37 +69,6 @@ function Push-To-Remote {
     git push -u origin $branch
 }
 
-function Get-LatestGitBranch {
-    param (
-        [string]$remoteName = "origin",
-        [string]$branchPattern = "release/"
-    )
-
-    # Define the pattern to match branches
-    $pattern = "$remoteName/$branchPattern"
-
-    # Get a list of remote branches matching the pattern
-    $branches = git branch -r | Where-Object { $_ -like "*$pattern*" }
-
-    if ($branches.Count -eq 0) {
-        Write-Output "No branches found matching the pattern." -ForegroundColor Red
-        return
-    }
-
-    # Extract version numbers from branch names to only take branches with two digits
-    # $versions = $branches | ForEach-Object { $_ -replace ".*$pattern(\d+\.\d+\.\d+).*", '$1' }
-    # $versions = $branches | ForEach-Object { $_ -replace ".*$pattern(\d+\.\d+).*", '$1' }
-    $versions = $branches | ForEach-Object { $_ -replace ".*$pattern(\d+\.\d+)(?!\.\d)", '$1' }
-
-    # Sort the version numbers and get the latest one
-    $latestVersion = $versions | Sort-Object -Descending | Select-Object -First 1
-
-    # Construct the name of the latest branch
-    $latestBranch = "$branchPattern$latestVersion"
-
-    return $latestBranch
-}
-
 function Reset-And-Remove {
     param (
         [string]$remoteBranch,
@@ -111,6 +81,46 @@ function Reset-And-Remove {
     # switch the remote branch
     git switch $remoteBranch
 
+}
+
+function Confirm-Export {
+    param (
+        [string[]]$ResourceGroups,
+        [string[]]$RemoteBranches
+    )
+
+    # Loop until the input is valid
+    do {
+        # Ensure ResourceGroups and remoteBranch are the same length
+        if ($ResourceGroups.Count -ne $RemoteBranches.Count) {
+            Write-Host "The number of ResourceGroups and remote branches don't match. Please provide correct input."
+            $ResourceGroups = Read-Host "Enter Resource Groups (comma-separated / no spaces)"
+            $RemoteBranches = Read-Host "Enter Remote Branches (comma-separated / no spaces)"
+            # Split again after user input
+            $ResourceGroups = $ResourceGroups -split ","
+            $RemoteBranches = $RemoteBranches -split ","
+        } else {
+            Write-Host ""
+            Write-Host ("{0,-30} {1,-30}" -f "Resource Group", "Remote Branch")
+            Write-Host ("{0,-30} {1,-30}" -f "--------------", "-------------")
+
+            for ($i = 0; $i -lt $ResourceGroups.Count; $i++) {
+                Write-Host ("{0,-30} {1,-30}" -f $ResourceGroups[$i], $RemoteBranches[$i])
+            }
+            $confirmation = Read-Host "Is this correct? (y/n)"
+
+            if ($confirmation -eq 'y') {
+                Write-Host "Proceeding with the export..."
+                return
+            } else {
+                Write-Host "Please enter the correct values."
+                $ResourceGroups = Read-Host "Enter Resource Groups (comma-separated / no spaces)"
+                $RemoteBranches = Read-Host "Enter Remote Branches (comma-separated / no spaces)"
+                $ResourceGroups = $ResourceGroups -split ","
+                $RemoteBranches = $RemoteBranches -split ","
+            }
+        }
+    } while ($true)
 }
 
 function Start-Export {
@@ -149,37 +159,40 @@ if($preChanges) {
     Read-Host "Press Enter to exit"
     exit
 }
-# Setup music source: https://eddiejackson.net/wp/?p=9268
-Add-Type -AssemblyName presentationCore
-$mediaPlayer = New-Object system.windows.media.mediaplayer
-$musicPath = Join-Path $PSScriptRoot "brazilian-bossa-nova-jazz.mp3"
-$mediaPlayer.open($musicPath)
+
+$ResourceGroups = Read-Host "Enter Resource Groups (comma-separated / no spaces)"
+$RemoteBranches = Read-Host "Enter Remote Branches (comma-separated / no spaces)"
+
+$ResourceGroupsList = $ResourceGroups.Split(',') 
+$RemoteBranchesList = $RemoteBranches.Split(',')
+
+# confirm and validate export user input
+Confirm-Export -ResourceGroups $ResourceGroupsList -RemoteBranches $RemoteBranchesList
+
 # Fetch changes from the remote repository
 git fetch --all --prune
-# Create a branch names
-$dailyDevlineExport = "$currentUserName/DailyDevlineLastestConfig$currentDate"
-$dailyRellineExport = "$currentUserName/DailyRellineLastestConfig$currentDate"
 
-# start music
-$mediaPlayer.Play()
+for ($i = 0; $i -lt $ResourceGroupsList.Count; $i++) {
+    $resourceGroup = $ResourceGroupsList[$i].Trim()
+    $remoteBranch = $RemoteBranchesList[$i].Trim()
+    $environment = $resourceGroup.Split('-')[2]
+    $apiKey = switch ($environment) {
+        "dev1" { $dev1APIkey }
+        "dev2" { $dev2APIkey }
+        "dev3" { $dev3APIkey }
+        "rel1" { $rel1APIkey }
+        "rel2" { $rel2APIkey }
+        default { "Invalid input" }
+    }
+    # Create a export branch based on remote branch and start export
+    $dailyExport = "$currentUserName/Daily" + $environment + "LineLastestConfig" + $currentDate
+    Start-Export -branch $dailyExport -remoteBranch $remoteBranch -APIkey $apiKey -environment $environment -ConfigExportPath $FGRConfigExportPath -ConfigLanguageAllPath $FGRLanguageAllPath -ConfigExport $FGRConfigExport -ConfigLanguage $FGRLanguageAll
+    # After export clean the exportBranch
+    Write-Host "Clean up local branches $dailyExport, if available" -ForegroundColor Blue
+    git switch master
+    git branch -D $dailyExport
+}
 
-# dev1 export
-Start-Export -branch $dailyDevlineExport -remoteBranch "master" -APIkey $dev1APIkey -environment "dev1" -ConfigExportPath $FGRConfigExportPath -ConfigLanguageAllPath $FGRLanguageAllPath -ConfigExport $FGRConfigExport -ConfigLanguage $FGRLanguageAll
-
-# dev3 export
-# Start-Export -branch $dailyDevlineExport -remoteBranch "master" -APIkey $dev3APIkey -environment "dev3" -ConfigExportPath $FGRConfigExportPath -ConfigLanguageAllPath $FGRLanguageAllPath -ConfigExport $FGRConfigExport -ConfigLanguage $FGRLanguageAll
-
-# rel1 export
-# $latestReleaseBranch = Get-LatestGitBranch
-# Start-Export -branch $dailyRellineExport -remoteBranch $latestReleaseBranch -APIkey $rel1APIkey -environment "rel1" -ConfigExportPath $FGRConfigExportPath -ConfigLanguageAllPath $FGRLanguageAllPath -ConfigExport $FGRConfigExport -ConfigLanguage $FGRLanguageAll
-
-#clean up
-Write-Host "Clean up local branches $dailyDevlineExport and $dailyRellineExport, if available" -ForegroundColor Blue
-git switch master
-git branch -D $dailyDevlineExport
-git branch -D $dailyRellineExport
-
-$mediaPlayer.Stop()
 Write-Host "Export complete! :D" -ForegroundColor Green
 $holiday_message = Get-ClosestHoliday -currentDate $currentDate -holidayDates $holiday_dates
 Write-Host $holiday_message -ForegroundColor Magenta
